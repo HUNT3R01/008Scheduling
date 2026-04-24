@@ -3,27 +3,38 @@
 
 #include <pthread.h>
 
-// Estructura que representa a cada proceso
 typedef struct {
     int id;
-    int burst_time;      // Tiempo total de CPU que necesita
-    int arrival_time;    // En qué momento llega a la cola
-    int remaining_time;  // Cuánto tiempo le falta (útil para RR y SRTF)
-    int wait_time;       // Tiempo de espera
-    int turnaround_time; // Tiempo desde que llega hasta que termina
-    
-    // Variables para el control de hilos
+    int burst_time;       // Tiempo total de CPU que necesita
+    int arrival_time;     // Momento en que llega a la cola
+    int remaining_time;   // Tiempo restante (usado en SRTF)
+    int wait_time;        // Tiempo esperando en la cola
+    int turnaround_time;  // Tiempo total desde llegada hasta completarse
+    int start_time;       // Primer momento en que ejecuta
+    int completion_time;  // Momento en que termina
     pthread_t thread;
 } Process;
 
-// Funciones que yo implemente
-void generate_random_processes(Process* processes, int count);
-void run_fifo(Process* processes, int count);
-void run_sjf(Process* processes, int count);
+// Representa un bloque en el Gantt: qué proceso corrió y en qué intervalo
+typedef struct {
+    int process_id;  // -1 = CPU idle
+    int start;
+    int end;
+} GanttEntry;
 
-// Funciones que faltan por implementar
-void run_rr(Process* processes, int count, int quantum);
-void run_srtf(Process* processes, int count);
-void print_gantt_chart(Process* processes, int count);
+// Utilidades
+void generate_random_processes(Process* processes, int count);
+void sort_by_arrival(Process* p, int n);
+void print_stats(Process* p, int n);
+
+// Algoritmos — retornan el Gantt generado y su tamaño
+void run_fifo(Process* p, int n, GanttEntry* gantt, int* gantt_size);
+void run_sjf (Process* p, int n, GanttEntry* gantt, int* gantt_size);
+void run_rr  (Process* p, int n, int quantum, GanttEntry* gantt, int* gantt_size);
+void run_srtf(Process* p, int n, GanttEntry* gantt, int* gantt_size);
+
+// Gantt Chart
+void add_gantt(GanttEntry* g, int* sz, int pid, int start, int end);
+void print_gantt_chart(const char* label, GanttEntry* gantt, int gantt_size);
 
 #endif
